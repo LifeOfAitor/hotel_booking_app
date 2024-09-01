@@ -1,4 +1,5 @@
 import pandas as pd
+from numpy.ma.core import squeeze
 
 df = pd.read_csv("hotels.csv", dtype={"id": str})
 
@@ -6,6 +7,7 @@ df = pd.read_csv("hotels.csv", dtype={"id": str})
 class Hotel:
     def __init__(self, hotel_id):
         self.hotel_id = hotel_id
+        self.name = df.loc[df["id"] == self.hotel_id, "name"].squeeze()
 
     def book(self):
         df.loc[df["id"] == self.hotel_id, "available"] = "no"
@@ -22,9 +24,17 @@ class ReservationTicket:
     def __init__(self, booked_hotel, customer_name):
         self.booked_hotel = booked_hotel
         self.customer_name = customer_name
+        self.hotel = booked_hotel
 
     def generate(self):
-        print("Reservation made")
+        content = f"""
+        Thanks for your reservation.
+        Here is the booking data:
+        Name: {self.customer_name.upper()}
+        Hotel: {self.hotel.name}
+        """
+        print(content)
+
 
 
 if __name__ == "__main__":
@@ -35,6 +45,6 @@ if __name__ == "__main__":
     if hotel.available():
         hotel.book()
         ticket = ReservationTicket(hotel, username)
-        ReservationTicket.generate(ticket)
+        ticket.generate()
     else:
         print("Hotel not available")
