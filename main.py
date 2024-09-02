@@ -43,6 +43,17 @@ class ReservationTicket:
         print(content)
 
 
+class SpaHotel(ReservationTicket):
+    def generate(self):
+        content = f"""
+        Thanks for your reservation.
+        Here is the SPA booking data:
+        Name: {self.customer_name.upper()}
+        Hotel: {self.hotel.name}
+        """
+        print(content)
+
+
 class CreditCard:
     def __init__(self, number):
         self.number = number
@@ -68,6 +79,7 @@ class SecureCreditCard(CreditCard):
         except ValueError:
             return False
 
+
 if __name__ == "__main__":
     print(df)
     hotel_id = input("Enter hotel ID: ")
@@ -81,6 +93,10 @@ if __name__ == "__main__":
                 username = input("Enter your name: ")
                 ticket = ReservationTicket(hotel, username)
                 ticket.generate()
+                spa = input("Do you want to book a Spa ticket? ")[0].lower()
+                if spa == "y":
+                    spa_hotel = SpaHotel(hotel, username)
+                    spa_hotel.generate()
             else:
                 print("Credit card authentication error")
         else:
