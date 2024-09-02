@@ -1,7 +1,10 @@
 import pandas as pd
 
 df = pd.read_csv("hotels.csv", dtype={"id": str})
-df_cards = pd.read_csv("cards.csv", dtype=str).to_dict(orient="records")
+df_cards = (pd.read_csv("cards.csv", dtype=str)
+            .to_dict(orient="records"))
+df_security = pd.read_csv("card_security.csv", dtype=str)
+
 
 class Hotel:
     def __init__(self, hotel_id):
@@ -14,13 +17,15 @@ class Hotel:
 
     def available(self):
         try:
-            if df.loc[df["id"] == self.hotel_id, "available"].squeeze() == "yes":
+            if df.loc[
+                df["id"] == self.hotel_id, "available"].squeeze() == "yes":
                 return True
             else:
                 print("Hotel not available")
 
         except ValueError:
             print("That hotel is incorrect")
+
 
 class ReservationTicket:
     def __init__(self, booked_hotel, customer_name):
@@ -51,17 +56,32 @@ class CreditCard:
             return False
 
 
+class SecureCreditCard(CreditCard):
+    def authenticate(self, wrote_password):
+        try:
+            password = df_security.loc[df_security["number"] == self.number,
+            "password"].squeeze()
+            if wrote_password == password:
+                return True
+            else:
+                return False
+        except ValueError:
+            return False
+
 if __name__ == "__main__":
     print(df)
-    username = input("Enter your name: ")
     hotel_id = input("Enter hotel ID: ")
     hotel = Hotel(hotel_id)
     if hotel.available():
-        credit_card = CreditCard(number="12345")
+        credit_card = SecureCreditCard(number="1234")
         if credit_card.validate(expiration="12/26", holder="JOHN SMITH",
                                 cvc="123"):
-            hotel.book()
-            ticket = ReservationTicket(hotel, username)
-            ticket.generate()
+            if credit_card.authenticate(wrote_password="mypass"):
+                hotel.book()
+                username = input("Enter your name: ")
+                ticket = ReservationTicket(hotel, username)
+                ticket.generate()
+            else:
+                print("Credit card authentication error")
         else:
             print("Error, there was a problem with the card")
